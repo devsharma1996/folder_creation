@@ -1,0 +1,66 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>File Upload System</title>
+    <link rel="stylesheet" href="{% static 'polls/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'polls/css/styles.css' %}">
+  </head>
+<body>
+
+    <nav id="context-menu" class="context-menu">
+    <ul id="context-menu__items" class="context-menu__items">
+         <li class="context-menu__item">
+        <a href="#" class="context-menu__link" data-action="Edit"><i class="fa fa-edit"></i> Rename</a>
+      </li>
+      <li class="context-menu__item">
+        <a href="#" class="context-menu__link" data-action="Delete"><i class="fa fa-times"></i> Delete</a>
+      </li>
+    </ul>
+  </nav>
+    
+   <div class="container">
+    <h1 id="h">File Upload</h1>
+    
+
+    <br>        
+        <div class="row">
+            <input type="file" id="browse" multiple>
+            <div class="col-lg-7">
+                <button type="button" class="btn start" id="fileupload-button">
+                    <i class="glyphicon glyphicon-plus"></i>
+                    <span>Add  Files....</span>
+                </button>
+                <button type="button" class="btn start" id="folderupload-button">
+                    <i class="glyphicon glyphicon-plus"></i>
+                    <span>Create Folder</span>
+                </button>
+                <!--<button type="button" id="filedelete-button" class="btn btn-danger delete">
+                    <i class="glyphicon glyphicon-trash"></i>
+                    <span>Delete</span>
+                </button>-->
+            </div>
+        </div>   
+       <ol id="directory-structure" class="breadcrumb">
+           <li class="active"><a href="#">Home</a></li>       
+      </ol>
+        <br>
+        <div class="row" id="list-of-folders">
+            
+            
+        </div>
+           <!-- The table listing the files available for upload/download -->
+        <table role="presentation" id="list-of-files" class="table"></table>
+    <br>
+</div>
+  <!-- jQuery (Bootstrap JS plugins depend on it) -->
+    <script src="{% static 'polls/js/jquery-2.1.4.min.js' %}"></script>
+    <script src="{% static 'polls/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'polls/js/script2.js' %}"></script>
+    <script src="{% static 'polls/js/script1.js' %}"></script>
+  <!--<script src="{% static 'polls/js/script.js' %}"></script>-->
+</body>
+</html>
