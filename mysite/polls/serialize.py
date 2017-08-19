@@ -1,4 +1,4 @@
-import re
+import re,os
 
 def order_name(name):
     name = re.sub(r'^.*/', '', name)
@@ -9,20 +9,24 @@ def order_name(name):
 
 
 
-def serialize(instance):
+def serialize_file(instance,size):
     
     return {
-        'thumbnailUrl':instance.file.url,
-        'name':order_name(instance.file.name),
-        'size':instance.file.size,
-        'id':instance.id,
+     
+        'name':order_name(instance),
+        'size':size,
+        'fullname':instance,
     }
+    
+
 
 def serialize_folder(instance):
     
-    index=instance.folder_name.rfind('/')
-    folderName=instance.folder_name[index+1:]
-    
+    #index=instance.folder_name.rfind('/')
+    index=instance.rfind('/')
+    #folderName=instance.folder_name[index+1:]
+    folderName=instance[index+1:]
+
     return {
-        'name':folderName,
+        'name':instance,
     }

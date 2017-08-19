@@ -29,6 +29,7 @@ function getCookie(name) {
 function listingItems(event){
     var xhr=new XMLHttpRequest();
     document.getElementById("list-of-folders").innerHTML="";
+    document.getElementById("list-of-files").innerHTML="";
     xhr.open("POST","list_the_files/");
     xhr.onreadystatechange=function(){
         if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
@@ -38,6 +39,7 @@ function listingItems(event){
             // if obj has folders then list the folder else list the files
             if(obj.hasOwnProperty('folders')){
                console.log(obj.folders);
+               displayButton('folders');
                 var folder=obj.folders;
                //Parse the json here to display folders
                 var folders="";
@@ -49,10 +51,21 @@ function listingItems(event){
                document.getElementById("list-of-folders").innerHTML+=folders;
 
             }
-            else{
+            else if(obj.hasOwnProperty('files')){
                console.log(obj.files);
+               displayButton('files');
                 //Parse the json here to display files
+                for(var i=0;i<obj.files.length;i++){
+             		var row = $("<tr></tr>");
+             		col1 = $("<td style='width:50%'>"+obj.files[i].name+"</td>");
+             		col2 = $("<td>"+(obj.files[i].size/1024).toFixed(2)+"KB</td>");
+             		col3 = $("<td><input type='checkbox' name='delete-service' value='"+obj.files[i].fullname+"'></td>");
+             		row.append(col1,col2,col3).prependTo("#list-of-files");
+    
+               }
            }
+           else
+           	displayButton('None');
        }
     };
     
@@ -64,6 +77,32 @@ function listingItems(event){
     xhr.setRequestHeader("X-CSRFToken", csrftoken);
     xhr.send(formData);
     
+}
+
+
+//function for hiding the Add Files or Add Folders or Delete buttons respectively
+
+function displayButton(tag){
+	if(tag=="files"){
+		//Hide the Add Folders button and display the Add Files and Delete Button
+		document.getElementById("folderupload-button").style.display="none";
+		document.getElementById("fileupload-button").style.display="inline";
+		document.getElementById("filedelete-button").style.display="inline";
+		}
+		
+	else if(tag=="folders"){
+		//Hide the Add Files and Delete button and diplay the Add Folders Button
+		document.getElementById("fileupload-button").style.display="none";
+		document.getElementById("folderupload-button").style.display="inline";
+		document.getElementById("filedelete-button").style.display="none";
+		}
+	else{
+	        //Hide the Delete button and diplay the Add Folders and Delete Button
+		document.getElementById("fileupload-button").style.display="inline";
+		document.getElementById("folderupload-button").style.display="inline";
+		document.getElementById("filedelete-button").style.display="none";
+		}
+
 }
 
 
@@ -106,8 +145,7 @@ document.querySelector("#folderupload-button").addEventListener("click",function
     toggleMenuOff();
     var name=prompt("Enter the folder name:");
     if(name!="" && name!=null){
-    var folders="<div class='col-sm-3'><img class='img-responsive' width='98' height='102' src='/static/polls/images/folder.jpg'><div>"+name+"</div></div>";
-    document.getElementById("list-of-folders").innerHTML+=folders;
+    
     
         
     // POST ajax request to upload_folder
@@ -116,14 +154,23 @@ document.querySelector("#folderupload-button").addEventListener("click",function
     xhr.onreadystatechange=function(){
         if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
             console.log(xhr.responseText);
+            var obj=JSON.parse(xhr.responseText);
             
+            if(obj.hasOwnProperty('error')){
+               alert(obj.error);
+
+            }
+            else{
+            	listingItems();
+            }
+                       
        }
     };
     
     //form for saving the breadcrumb and sending it along with POST
     var formData=new FormData();
     formData.append("breadcrumb",breadcrumb);
-    formData.append("name",name)
+    formData.append("folder",name)
     var csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader("X-CSRFToken", csrftoken);
     xhr.send(formData);
@@ -147,15 +194,23 @@ function rename_folder(){
     xhr.open("POST","rename_folder/");
     xhr.onreadystatechange=function(){
         if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            console.log(xhr.responseText);
-            listingItems();
+            var obj=JSON.parse(xhr.responseText);
+            
+            if(obj.hasOwnProperty('error')){
+               alert(obj.error);
+
+            }
+            else{
+            	listingItems();
+            }
        }
     };
     
     //form for saving the breadcrumb and sending it along with POST
     var formData=new FormData();
-    formData.append("breadcrumb",breadcrumb+"/"+name);
-    formData.append("oldname",breadcrumb+"/"+folder_selected.textContent);
+    formData.append("breadcrumb",breadcrumb);
+    formData.append("newName",name);
+    formData.append("oldName",folder_selected.textContent);
     
     var csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader("X-CSRFToken", csrftoken);
@@ -182,7 +237,8 @@ function remove_folder(){
     
     //form for saving the breadcrumb and sending it along with POST
     var formData=new FormData();
-    formData.append("breadcrumb",breadcrumb+"/"+folder_selected.textContent);
+    formData.append("breadcrumb",breadcrumb);
+    formData.append("folder",folder_selected.textContent);
     //formData.append("oldname",breadcrumb+"/"+folder_selected.textContent);
     
     var csrftoken = getCookie('csrftoken');
@@ -229,4 +285,39 @@ document.addEventListener('dblclick',function(event){
         listingItems();
         document.getElementById("directory-structure").innerHTML+="<li><a href='#'>"+target.nextSibling.textContent+"</a></li>";
     }
+});
+
+
+
+var tapped=false;
+
+document.addEventListener('touchstart',function(event){
+	toggleMenuOff();
+	var touchobj=event.changedTouches[0]
+	var target=event.target;
+	console.log(target.tagName);
+	//console.log(target.nextSibling.textContent);
+	if(target.tagName=="IMG"){
+	
+	
+		if(!tapped){
+			tapped=setTimeout(function(){
+				tapped=null;
+				
+        
+			},300);
+		
+		}
+		else{
+			clearTimeout(tapped);
+			tapped=null;
+			breadcrumb+="/"+target.nextSibling.textContent;
+        		// list the items inside this folder
+        		listingItems();
+        		document.getElementById("directory-structure").innerHTML+="<li><a href='#'>"+target.nextSibling.textContent+"</a></li>";
+		
+		}
+		
+	}
+
 });
